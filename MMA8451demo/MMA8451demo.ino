@@ -18,10 +18,12 @@
 /**************************************************************************/
 
 #include <Wire.h>
+#include <Filters.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_MMA8451.h>
 
 Adafruit_MMA8451 mma = Adafruit_MMA8451();
+double roll = 0.00, pitch = 0.00;    //Roll & Pitch are the angles which rotate by the axis X and y 
 
 void setup(void) {
   Serial.begin(9600);
@@ -93,14 +95,54 @@ void printOrientation(){
       break;
     }
 }
+//Roll and Pitch Calculations based on this website:( https://www.dfrobot.com/wiki/index.php/How_to_Use_a_Three-Axis_Accelerometer_for_Tilt_Sensing)
+void RP_calculate(){ 
+   /* Get a new sensor event */ 
+  sensors_event_t event; 
+  mma.getEvent(&event);
+  
+  double x_Buff = float(event.acceleration.x);
+  double y_Buff = float(event.acceleration.y);
+  double z_Buff = float(event.acceleration.z);
+  roll = atan2(y_Buff , z_Buff) * 57.3;
+  pitch = atan2((- x_Buff) , sqrt(y_Buff * y_Buff + z_Buff * z_Buff)) * 57.3;
+}
+
+//print roll, pitch data
+void printRP() {
+  Serial.print("Roll:\t"); Serial.print(roll); 
+  Serial.print("\tPitch:\t"); Serial.print(pitch ); 
+  Serial.println();
+}
 
 void loop() {
   mma.read();
+  RP_calculate();
 
+  sensors_event_t event; 
+  mma.getEvent(&event);
+
+  //-----Printing Functions:-------
+  
   //printRawData();
   printAccelerationData();
+  printRP();
   //printOrientation();
-  
+  Serial.println();
+
+  //-------------------------------
+  //-------Filtering---------------
+
+  // filters out changes faster that 1 Hz.
+  float filterFrequency = 5.0;  
+
+  // create a one pole (RC) lowpass filter
+  /*FilterOnePole lowpassFilter( LOWPASS, filterFrequency );   
+
+  while( true ) {
+    lowpassFilter.input( event.acceleration.y );
+    lowpassFilter.print();
+}*/
   delay(500);
   
 }

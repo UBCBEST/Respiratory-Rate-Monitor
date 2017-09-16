@@ -18,7 +18,6 @@
 /**************************************************************************/
 
 #include <Wire.h>
-#include <Filters.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_MMA8451.h>
 
@@ -131,18 +130,7 @@ void loop() {
   Serial.println();
 
   //-------------------------------
-  //-------Filtering---------------
 
-  // filters out changes faster that 1 Hz.
-  float filterFrequency = 5.0;  
-
-  // create a one pole (RC) lowpass filter
-  /*FilterOnePole lowpassFilter( LOWPASS, filterFrequency );   
-
-  while( true ) {
-    lowpassFilter.input( event.acceleration.y );
-    lowpassFilter.print();
-}*/
   delay(500);
   
 }

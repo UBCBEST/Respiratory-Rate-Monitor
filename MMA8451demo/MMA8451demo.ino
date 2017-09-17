@@ -59,7 +59,7 @@ void printAccelerationData() {
   /* Display the results (acceleration is measured in m/s^2) */
   Serial.print("X: \t"); Serial.print(event.acceleration.x); Serial.print("\t");
   Serial.print("Y: \t"); Serial.print(event.acceleration.y); Serial.print("\t");
-  Serial.print("Z: \t"); Serial.print(event.acceleration.z); Serial.println("\t");
+  Serial.print("Z: \t"); Serial.print(event.acceleration.z); Serial.print("\t");
   //Serial.println("m/s^2 "); 
 }
 
@@ -127,7 +127,6 @@ void loop() {
   printAccelerationData();
   printRP();
   //printOrientation();
-  Serial.println();
 
   //-------------------------------
 

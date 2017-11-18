@@ -1,4 +1,3 @@
-
 import processing.serial.*;
 import controlP5.*;
 
@@ -9,18 +8,18 @@ PFont f;
 ControlP5 cp5;
 Chart myChart;
 
-String ButtonPressed;
+String ButtonActive, ButtonPressed, PrevButtonPressed;
 Button X1, Y1;
 
 void setup()
 {
-  size(1200,600, P3D);
+  size(1200,600);
    //cp5 and chart objects
-  /* cp5 = new ControlP5(this);
+   cp5 = new ControlP5(this);
    myChart = cp5.addChart("data")
                .setPosition(600, 50)
                .setSize(500, 300)
-               .setRange(-20, 20)
+               .setRange(-10, 10)
                .setView(Chart.LINE) // use Chart.LINE, Chart.PIE, Chart.AREA, Chart.BAR_CENTERED
                .setStrokeWeight(15)
                .setColorCaptionLabel(color(40))
@@ -30,7 +29,8 @@ void setup()
   myChart.addDataSet("incoming");
   myChart.setData("incoming", new float[100]);
   
-  ButtonPressed = "None";
+  ButtonActive = "X1";
+  
   // create a new button with name 'X1'
   X1 = cp5.addButton("X1")
      .setValue(0)
@@ -45,15 +45,12 @@ void setup()
      .setPosition(500,80)
      .setSize(80,15)
      .setSwitch(true);
-     ;*/
+     ;
   
   //setup serial port and communication between arduino and processing
   String portName = Serial.list()[0]; //depends on your serial port
   myPort = new Serial(this, portName, 9600); 
   f = createFont("Arial", 16, true);
-  
-  //make orthogonal view
-  ortho(-width/2, width/2, -height/2, height/2);
   
   //Initialize data variables
   x_acc_1 = 0.0;
@@ -62,6 +59,8 @@ void setup()
   roll_1 = 0.0;
   pitch_1 = 0.0;
   yaw_1 = 0.0;
+  
+  X1.setOn();
   
 }
 
@@ -87,39 +86,41 @@ void draw()
       text("X1:  " + data[1] + "    Y1: " + data[3] + "    Z1: " + data[5] + 
       "    Roll1: " + data[7] + "    Pitch1: " + data[9],20,20);
       
-      //display accelerometer as 3D box
-      displayBox(roll_1, pitch_1, yaw_1, 200, 150, 0);
-      
-      //plotChart();
+      plotChart();
      
-    } 
-
+    }
 }
 
 public void controlEvent(ControlEvent theEvent) {
-  ButtonPressed = theEvent.getController().getName();
-}
-
-void displayBox (float roll, float pitch, float yaw, int xPos, int yPos, int zPos){
-      stroke(255);
-      fill(51);
-      translate(xPos, yPos, zPos);
-      rotateX(radians(roll));
-      rotateY(radians(-1*pitch));
-      box(150, 150, 20);  
-}
-
-void plotChart(){
-  if(ButtonPressed == "X1"){
-    myChart.push("incoming", x_acc_1);
-    Y1.setOff();
-  } 
   
-  if(ButtonPressed == "Y1"){
-    myChart.push("incoming", y_acc_1);
-    X1.setOff();
+  ButtonPressed = theEvent.getController().getName();
+  
+  
+  if(X1.isOn() && !Y1.isOn()){
+    ButtonActive = "X1";
+  }
+  
+  if(Y1.isOn() && !X1.isOn()){
+    ButtonActive = "Y1";
+  }
+  
+  if(!Y1.isOn() && !X1.isOn()){
+    ButtonActive = "None";
   }
 }
 
-
+void plotChart(){
+  
+  switch(ButtonActive){
+    case "X1":
+      myChart.push("incoming", x_acc_1);
+      Y1.setOff();
+      break;
+    case "Y1":
+      myChart.push("incoming", y_acc_1);
+      X1.setOff();
+    case "None":
+      myChart.push("incoming", 0);
     
+  }
+}

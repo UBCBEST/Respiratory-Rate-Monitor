@@ -158,8 +158,13 @@ void loop()
   
   if ((lastPrint + PRINT_SPEED) < millis())
   {
-    printGyro();  // Print "G: gx, gy, gz"
+    //printGyro();  // Print "G: gx, gy, gz"
     printAccel(); // Print "A: ax, ay, az"
+    //printAttitude(imu.ax, imu.ay, imu.az, 
+  //               -imu.my, -imu.mx, imu.mz);
+                 
+    //printAttitude(imu2.ax, imu2.ay, imu2.az, 
+//                 -imu2.my, -imu2.mx, imu2.mz);
     Serial.println();
     
     lastPrint = millis(); // Update lastPrint time
@@ -200,7 +205,7 @@ void printAccel()
 {  
   // Now we can use the ax, ay, and az variables as we please.
   // Either print them as raw ADC values, or calculated in g's.
-  Serial.print("A: ");
+  //Serial.print("A: ");
 #ifdef PRINT_CALCULATED
   // If you want to print calculated values, you can use the
   // calcAccel helper function to convert a raw ADC value to
@@ -216,7 +221,7 @@ void printAccel()
   Serial.print(imu2.calcAccel(imu2.ay), 2);
   Serial.print(", ");
   Serial.print(imu2.calcAccel(imu2.az), 2);
-  Serial.println(" g");
+  //Serial.println(" g");
 #elif defined PRINT_RAW 
   Serial.print(imu.ax);
   Serial.print(", ");

@@ -1,41 +1,38 @@
- //<>// //<>//
-//<<<<<<< HEAD
-////hi
-//=======
-//>>>>>>> 97f210a6c9a74105442c787a0315af235d645ee1
+// Import libraries //<>//
 import processing.serial.*;
 import controlP5.*;
 import signal.library.*;
 
 
 // Data class for accelerometer data
-public class AccelMeasurements{
-  float m_x_acc_l, m_y_acc_l, m_z_acc_l, m_roll_l, m_pitch_l, m_yaw_l;
+public class AccelData{
+  float m_x_acc, m_y_acc, m_z_acc, m_roll, m_pitch, m_yaw;
   
-  public AccelMeasurements(){
+  public AccelData(){
   // constructor for the class, empty for now 
   }
   
   // Setter function for class members, takes accelerometer data and casts to a float 
-  public void ImportData(String x_acc_l, String y_acc_l, String z_acc_l, String roll_l, String pitch_l, String yaw_l){
-    this.m_x_acc_l = float(x_acc_l); 
-    this.m_y_acc_l = float(y_acc_l);
-    this.m_z_acc_l = float(z_acc_l);
-    this.m_roll_l = float(roll_l);
-    this.m_pitch_l = float(pitch_l);
-    this.m_yaw_l = float(yaw_l);
+  public void ImportData(String x_acc, String y_acc, String z_acc, String roll, String pitch, String yaw){
+    this.m_x_acc   = float(x_acc); 
+    this.m_y_acc   = float(y_acc);
+    this.m_z_acc   = float(z_acc);
+    this.m_roll    = float(roll);
+    this.m_pitch   = float(pitch);
+    this.m_yaw     = float(yaw);
   }
 }  
 
+// Variable and Object declarations
 Serial myPort;
-AccelMeasurements AccelData_Front, AccelData_Back;
+AccelData AccelData_Front, AccelData_Back;
 String val;
-//float x_acc_1,y_acc_1,z_acc_1,roll_1,pitch_1,yaw_1;
 PFont f;
 ControlP5 cp5;
 SignalFilter frontFilter, backFilter;
 Chart myChart;
 
+// Parameters for signal filter
 float minCutoff = 0.05;
 float beta      = 4.0;
  
@@ -49,7 +46,7 @@ void setup()
    myChart = cp5.addChart("data")
                .setPosition(600, 50)
                .setSize(500, 300)
-               .setRange(-0.5, 0.5)
+               .setRange(-0.5, 0.5)  // Scale is in Gs
                .setView(Chart.LINE) // use Chart.LINE, Chart.PIE, Chart.AREA, Chart.BAR_CENTERED
                .setStrokeWeight(15)
                .setColorCaptionLabel(color(40))
@@ -59,24 +56,16 @@ void setup()
   myChart.addDataSet("incoming");
   myChart.setData("incoming", new float[100]);
 
-  //setup serial port and communication between arduino and processing
+  // Setup serial port and communication between arduino and processing
   String portName = Serial.list()[0]; //depends on your serial port
   myPort = new Serial(this, portName, 115200); 
-  AccelData_Front = new AccelMeasurements();
-  AccelData_Back = new AccelMeasurements();
+ 
+  AccelData_Front = new AccelData();
+  AccelData_Back = new AccelData();
   f = createFont("Arial", 16, true);
   
   //make orthogonal view
   ortho(-width/2, width/2, -height/2, height/2);
-  
-  //Initialize data variables
-  //x_acc_1 = 0.0;
-  //y_acc_1 = 0.0;
-  //z_acc_1 = 0.0;
-  //roll_1 = 0.0;
-  //pitch_1 = 0.0;
-  //yaw_1 = 0.0;
-   
   
   // Disable graph until we want to plot
   cp5.setAutoDraw(false); 
@@ -84,80 +73,73 @@ void setup()
 
 void draw()
 {
-    frontFilter.setMinCutoff(minCutoff);
-    frontFilter.setBeta(beta);
-    backFilter.setMinCutoff(minCutoff);
-    backFilter.setBeta(beta);
+  // Pass filter parameters into filter class objects
+  frontFilter.setMinCutoff(minCutoff);
+  frontFilter.setBeta(beta);
+  backFilter.setMinCutoff(minCutoff);
+  backFilter.setBeta(beta);
 
-    if ( myPort.available() > 0) 
-    {  // If data is available,
-      int lf = 10; 
-      val = myPort.readStringUntil(lf);         // read serial data and store it in val
-      String [] data; 
+  if ( myPort.available() > 0) 
+  {  // If data is available,
+    int lf = 10;  
+    val = myPort.readStringUntil(lf);  // Read and store serial data from Arduino, stop at 'Line Feed' character
+    String [] data; 
       
-      if (val != null){
-        data = splitTokens(val, ", ");  //split up serial data and store in array of strings
-      }
-      else{
-        data = null; 
-      }
+    if (val != null){
+      data = splitTokens(val, ", ");   // Store serial data into an array of strings
+    }
+    else{
+      data = null; 
+    }
       
-      if (data != null){
-        if (data.length == 12){
-          //cast each string into a float and store into appropriate variables
+    if (data != null){
+      if (data.length == 12){  
+        // Import serial data into acceleration class object members
+        AccelData_Front.ImportData(data[0],data[1],data[2],data[6],data[7],data[8]); 
+        AccelData_Back.ImportData(data[3],data[4],data[5],data[9],data[10],data[11]);
           
-          AccelData_Front.ImportData(data[0],data[1],data[2],data[6],data[7],data[8]);  // Currently just trying to duplicate the rotating box
-          AccelData_Back.ImportData(data[3],data[4],data[5],data[9],data[10],data[11]);
+        // Apply filtering to acceleration data in the Z-axis
+        AccelData_Front.m_z_acc = frontFilter.filterUnitFloat( AccelData_Front.m_z_acc );
+        AccelData_Back.m_z_acc = backFilter.filterUnitFloat( AccelData_Back.m_z_acc );
+
+        // Display serial data on the top left hand side of the screen 
+        displayData(20,20,20,50);
           
-          AccelData_Front.m_z_acc_l = frontFilter.filterUnitFloat( AccelData_Front.m_z_acc_l );
-          AccelData_Back.m_z_acc_l = backFilter.filterUnitFloat( AccelData_Back.m_z_acc_l );
-          //x_acc_1 = float(data[1]);
-          //y_acc_1 = float(data[3]);
-          //z_acc_1 = float(data[5]);
-          
-          //roll_1 = float(data[7]);
-          //pitch_1 = float(data[9]);
-          //yaw_1 = 0.0;
-          
-          //Display obtained data on screen at the top
-          //TODO: Encapsulate the text printing into a function 
-          background(100); //clear screen
-          textFont(f,15);                  
-          fill(255);                         
-          text("X1:  " + data[0] + "    Y1: " + data[1] + "    Z1: " + AccelData_Front.m_z_acc_l + 
-          "    Roll1: " + data[6] + "    Pitch1: " + data[7],20,20);
-          text("X2:  " + data[3] + "    Y2: " + data[4] + "    Z2: " + AccelData_Back.m_z_acc_l + 
-          "    Roll2: " + data[9] + "    Pitch2: " + data[10],20,50);
-          
-          //display accelerometer as 3D box
-          //Note: The library will treat subsequent translation/rotation data as
-          // an aggregate of the last input until the loop/cycle refreshes
-          displayBox(AccelData_Front, 200, 150, 0, #ff0000);  // Accelerometer 1's visualization object
-          displayBox(AccelData_Back, 200, 300, 0, 51);  // Accelerometer 2's visualization object
+        // Display accelerometer as 3D box
+        displayBox(AccelData_Front, 200, 150, 0, #ff0000);  // Accelerometer 1's visualization object
+        displayBox(AccelData_Back, 200, 300, 0, 51);  // Accelerometer 2's visualization object
         
-          // Enable chart and plot data
-          camera(); 
-          cp5.draw(); 
-          plotChart();
+        // Enable chart and plot data
+        camera(); 
+        cp5.draw(); 
+        plotChart();
         }
-      }    
-       
+      }     
     } 
-
 }
 
-void displayBox (AccelMeasurements AccelData, int xPos, int yPos, int zPos, int rgb){
-      pushMatrix();
-      stroke(255);
-      fill(rgb);
-      translate(xPos, yPos, zPos);
-      rotateX(radians(AccelData.m_roll_l));
-      rotateY(radians(-1*AccelData.m_pitch_l));
-      box(150, 150, 20);  
-      popMatrix();
+void displayBox (AccelData AccelData, int xPos, int yPos, int zPos, int rgb){
+  pushMatrix();
+  stroke(255);
+  fill(rgb);
+  translate(xPos, yPos, zPos);
+  rotateX(radians(AccelData.m_roll));
+  rotateY(radians(-1*AccelData.m_pitch));
+  box(150, 150, 20);  
+  popMatrix();
 }
 
+void displayData( int x_pos1, int y_pos1, int x_pos2, int y_pos2){
+  background(100); //clear screen
+  textFont(f,15);                  
+  fill(255);                         
+  text("X1:  " + AccelData_Front.m_x_acc + "    Y1: " + AccelData_Front.m_y_acc + "    Z1: " + AccelData_Front.m_z_acc + 
+  "    Roll1: " + AccelData_Front.m_roll + "    Pitch1: " + AccelData_Front.m_pitch, x_pos1, y_pos1);
+  text("X2:  " + AccelData_Back.m_x_acc + "    Y2: " + AccelData_Back.m_y_acc + "    Z2: " + AccelData_Back.m_z_acc + 
+  "    Roll2: " + AccelData_Back.m_roll + "    Pitch2: " + AccelData_Back.m_pitch, x_pos2, y_pos2);
+}
 
+// Graph the difference between the Z-axis acceleration of the two accelerometers
 void plotChart(){
-      myChart.push("incoming", AccelData_Front.m_z_acc_l + AccelData_Back.m_z_acc_l);
+  myChart.push("incoming", AccelData_Front.m_z_acc);
 }   

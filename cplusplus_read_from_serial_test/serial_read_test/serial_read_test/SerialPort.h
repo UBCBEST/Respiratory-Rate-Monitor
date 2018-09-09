@@ -1,28 +1,41 @@
-// Base serial read header and source files retrieved from https://blog.manash.me/serial-communication-with-an-arduino-using-c-on-windows-d08710186498
-#ifndef SERIALPORT_H
-#define SERIALPORT_H
+// Base serial read header and source files retrieved from https://playground.arduino.cc/Interfacing/CPPWindows
+// Requires the Microsoft .NET Framework to make use of System.IO
+#ifndef SERIALPORT_H_INCLUDED
+#define SERIALPORT_H_INCLUDED
 
 #define ARDUINO_WAIT_TIME 2000
-#define MAX_DATA_LENGTH 255
 
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-class SerialPort
+class Serial
 {
 private:
-	HANDLE handler;
+	//Serial comm handler
+	HANDLE hSerial;
+	//Connection status
 	bool connected;
+	//Get various information about the connection
 	COMSTAT status;
+	//Keep track of last error
 	DWORD errors;
-public:
-	SerialPort(const char *portName);
-	~SerialPort();
 
-	int readSerialPort(char *buffer, unsigned int buf_size);
-	bool writeSerialPort(char *buffer, unsigned int buf_size);
-	bool isConnected();
+public:
+	//Initialize Serial communication with the given COM port
+	Serial(const char *portName);
+	//Close the connection
+	~Serial();
+	//Read data in a buffer, if nbChar is greater than the
+	//maximum number of bytes available, it will return only the
+	//bytes available. The function return -1 when nothing could
+	//be read, the number of bytes actually read.
+	int ReadData(char *buffer, unsigned int nbChar);
+	//Writes data from a buffer through the Serial connection
+	//return true on success.
+	bool WriteData(const char *buffer, unsigned int nbChar);
+	// Status flag for connection to the serial device 
+	bool IsConnected();
 };
 
-#endif // SERIALPORT_H
+#endif // SERIALPORT_H_INCLUDED

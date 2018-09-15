@@ -96,7 +96,7 @@ int Serial::ReadData(char *buffer, unsigned int nbChar)
 			toRead = this->status.cbInQue;
 		}
 
-		//Try to read the require number of chars, and return the number of read bytes on success
+		//Try to read the requested number of chars, and return the number of read bytes on success
 		if (ReadFile(this->hSerial, buffer, toRead, &bytesRead, NULL)) {
 			return bytesRead;
 		}
@@ -105,6 +105,27 @@ int Serial::ReadData(char *buffer, unsigned int nbChar)
 	return 0;
 }
 
+// WIP: Takes the character buffer from ReadFile and the number of bytes read, parses the buffer until the desired end of line 
+// character is reached. When its reached then print it. Move the remainder of the string into a private class member buffer
+// TODO: In the future have this populate a class which includes members representing each point of data we want to measure
+void Serial::ParseRead(char *inputBuffer, char *outputBuffer, int nbChar)
+{
+	int inBufEOL_pos;	
+	int ParseBuf_len = strlen(ParseBuffer); // size of our parse buffer
+	char * pch = (char*) memchr(inputBuffer, '/n', nbChar);	// Get the pointer to the end-of-line character
+	
+	if (pch != NULL){	// We found the endofline character 
+		inBufEOL_pos = (pch - inputBuffer + 1);	// This returns the position NOT the index of the end of line character
+		if (ParseBuf_len) {		// Check if our parse buffer contains contents from the previous read
+
+		}
+		else { // Its empty. We can directly copy to our output buffer
+			memset(outputBuffer, 0, strlen(outputBuffer)); // Clear this buffer before writing to it
+			strncpy(outputBuffer, inputBuffer, inBufEOL_pos);
+		}
+
+
+}
 
 bool Serial::WriteData(const char *buffer, unsigned int nbChar)
 {

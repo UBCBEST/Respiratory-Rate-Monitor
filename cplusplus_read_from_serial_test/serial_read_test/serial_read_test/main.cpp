@@ -7,7 +7,7 @@ using namespace std;
 
 // application reads from the specified serial port and reports the collected data
 int main(int argc, _TCHAR* argv[]) {
-	Serial Arduino("\\\\.\\COM4");    // Adjust to match name of COM port 
+	Serial Arduino("\\\\.\\COM5");    // Adjust to match name of COM port 
 
 	if (Arduino.IsConnected())
 		printf("We're connected");

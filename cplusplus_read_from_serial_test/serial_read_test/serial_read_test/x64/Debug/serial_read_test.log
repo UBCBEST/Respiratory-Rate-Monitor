@@ -1,0 +1,5 @@
+﻿  main.cpp
+c:\ubc best\cplusplus_read_from_serial_test\serial_read_test\serial_read_test\serialport.h : fatal error C1073: Internal error involving incremental compilation(compiler file 'f:\dd\vctools\compiler\cxxfe\sl\p1\c\p0io.c', line 1187)
+  SerialPort.cpp
+c:\ubc best\cplusplus_read_from_serial_test\serial_read_test\serial_read_test\serialport.h : fatal error C1073: Internal error involving incremental compilation(compiler file 'f:\dd\vctools\compiler\cxxfe\sl\p1\c\p0io.c', line 1187)
+  Generating Code...

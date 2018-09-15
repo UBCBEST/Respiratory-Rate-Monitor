@@ -108,23 +108,34 @@ int Serial::ReadData(char *buffer, unsigned int nbChar)
 // WIP: Takes the character buffer from ReadFile and the number of bytes read, parses the buffer until the desired end of line 
 // character is reached. When its reached then print it. Move the remainder of the string into a private class member buffer
 // TODO: In the future have this populate a class which includes members representing each point of data we want to measure
-void Serial::ParseRead(char *inputBuffer, char *outputBuffer, int nbChar)
+void Serial::ParseRead(char *inputBuffer, int nbChar)
 {
+	char outputBuffer[256] = ""; 
 	int inBufEOL_pos;	
 	int ParseBuf_len = strlen(ParseBuffer); // size of our parse buffer
 	char * pch = (char*) memchr(inputBuffer, '/n', nbChar);	// Get the pointer to the end-of-line character
 	
-	if (pch != NULL){	// We found the endofline character 
+	if (pch != NULL) {	// We found the endofline character 
 		inBufEOL_pos = (pch - inputBuffer + 1);	// This returns the position NOT the index of the end of line character
 		if (ParseBuf_len) {		// Check if our parse buffer contains contents from the previous read
+			// Currently we aren't worried about overflow (though this could be a good improvement in the future)
+			strncat(ParseBuffer, inputBuffer, inBufEOL_pos); 
+			printf("%s", ParseBuffer);	// Our parse buffer contains enough content to print
+			memset(ParseBuffer, 0, strlen(ParseBuffer));	// Now that we've printed, clear the buffer 
 
+			if (nbChar > inBufEOL_pos) {	// If we have any remaining characters in the input (which we will)
+
+			}
 		}
 		else { // Its empty. We can directly copy to our output buffer
-			memset(outputBuffer, 0, strlen(outputBuffer)); // Clear this buffer before writing to it
 			strncpy(outputBuffer, inputBuffer, inBufEOL_pos);
+			printf("%s", outputBuffer);		// Print the contents	
 		}
+	}
+	else {				// No end of line character, store our data into our buffer
+		strncat(ParseBuffer, inputBuffer, nbChar);
 
-
+	}
 }
 
 bool Serial::WriteData(const char *buffer, unsigned int nbChar)

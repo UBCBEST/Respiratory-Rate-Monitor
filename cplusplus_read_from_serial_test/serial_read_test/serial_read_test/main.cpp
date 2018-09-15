@@ -12,6 +12,9 @@ int main(int argc, _TCHAR* argv[]) {
 	if (Arduino.IsConnected())
 		printf("We're connected");
 
+	printf("Initializing");		// TEMP: 
+	Sleep(2000);				// Wait for two seconds (arbitrary) to throw away the first few malformed bits (not entirely sure if this initial data will get ignored or placed in a FIFO)
+
 	char incomingData[256] = "";			// don't forget to pre-allocate memory
 											//printf("%s\n",incomingData);
 	int dataLength = 255;

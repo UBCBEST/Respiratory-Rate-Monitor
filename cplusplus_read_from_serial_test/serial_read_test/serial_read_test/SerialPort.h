@@ -33,7 +33,7 @@ public:
 	//bytes available. The function return -1 when nothing could
 	//be read, the number of bytes actually read.
 	int ReadData(char *buffer, unsigned int nbChar);
-	void ParseRead(char *inputBuffer, char *outputBuffer, int nbChar);
+	void ParseRead(char *inputBuffer, int nbChar);
 	//Writes data from a buffer through the Serial connection
 	//return true on success.
 	bool WriteData(const char *buffer, unsigned int nbChar);

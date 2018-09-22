@@ -26,9 +26,8 @@ int main(int argc, _TCHAR* argv[]) {
 		printf("Bytes read: (0 means no data available) %i\n", readResult);
 		// Arduino data is received as a string, will also need to separate and pack
 		// into individual variables (or a class/struct for each measurement
-		incomingData[readResult] = 0;
+		Arduino.ParseRead(incomingData, dataLength);
 
-		printf("%s", incomingData);
 		Sleep(500);
 	}
 	return 0;

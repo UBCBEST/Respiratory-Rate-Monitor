@@ -113,28 +113,39 @@ void Serial::ParseRead(char *inputBuffer, int nbChar)
 	char outputBuffer[256] = ""; 
 	int inBufEOL_pos;	
 	int ParseBuf_len = strlen(ParseBuffer); // size of our parse buffer
-	char * pch = (char*) memchr(inputBuffer, '/n', nbChar);	// Get the pointer to the end-of-line character
+	char * pch = (char*) memchr(inputBuffer, '\n', nbChar);	// Get the pointer to the end-of-line character
 	
+	//printf("STARTING STRING is %s \n", inputBuffer);
+
 	if (pch != NULL) {	// We found the endofline character 
 		inBufEOL_pos = (pch - inputBuffer + 1);	// This returns the position NOT the index of the end of line character
+		//printf("EOL CHARACTER FOUND AT %d POSITION \n", inBufEOL_pos);
 		if (ParseBuf_len) {		// Check if our parse buffer contains contents from the previous read
 			// Currently we aren't worried about overflow (though this could be a good improvement in the future)
-			strncat(ParseBuffer, inputBuffer, inBufEOL_pos); 
-			printf("%s", ParseBuffer);	// Our parse buffer contains enough content to print
-			memset(ParseBuffer, 0, strlen(ParseBuffer));	// Now that we've printed, clear the buffer 
-
+			strncat_s(ParseBuffer, inputBuffer, inBufEOL_pos);	// Concatonate on our parse buffer
+			printf("%s\n", ParseBuffer);						// Our parse buffer contains enough content to print
+			memset(ParseBuffer, 0, strlen(ParseBuffer));		// Contents have been printed, clear the buffer 
+			//printf("PRINTED TO PARTIALLY FULL BUFFER \n");		// DELETE LATER
 			if (nbChar > inBufEOL_pos) {	// If we have any remaining characters in the input (which we will)
-
+				memcpy(outputBuffer, &inputBuffer[inBufEOL_pos + 1], (nbChar - inBufEOL_pos));	// Copy the remainder of the input into the buffer
+				ParseRead(outputBuffer, (nbChar - inBufEOL_pos));	// Recursively call this function
 			}
 		}
 		else { // Its empty. We can directly copy to our output buffer
-			strncpy(outputBuffer, inputBuffer, inBufEOL_pos);
-			printf("%s", outputBuffer);		// Print the contents	
+			strncpy_s(outputBuffer, inputBuffer, inBufEOL_pos);
+			printf("%s\n", outputBuffer);		// Print the contents	
+			//printf("PRINTED TO EMPTY BUFFER \n");	// DELETE LATER
+			if (nbChar > inBufEOL_pos) {	// If we have any remaining characters in the input (which we will)
+				memset(outputBuffer, 0, strlen(outputBuffer));		// Contents have been printed, clear the buffer 
+				memcpy(outputBuffer, &inputBuffer[inBufEOL_pos + 1], (nbChar - inBufEOL_pos));	// Copy the remainder of the input into the buffer
+				ParseRead(outputBuffer, (nbChar - inBufEOL_pos));	// Recursively call this function
+			}
 		}
+
 	}
 	else {				// No end of line character, store our data into our buffer
-		strncat(ParseBuffer, inputBuffer, nbChar);
-
+		//printf("NO END OF LINE CHARACTER FOUND IN 255 BYTES \n");
+		strncat_s(ParseBuffer, inputBuffer, nbChar);
 	}
 }
 

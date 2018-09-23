@@ -127,7 +127,7 @@ void Serial::ParseRead(char *inputBuffer, int nbChar)
 			memset(ParseBuffer, 0, strlen(ParseBuffer));		// Contents have been printed, clear the buffer 
 			//printf("PRINTED TO PARTIALLY FULL BUFFER \n");		// DELETE LATER
 			if (nbChar > inBufEOL_pos) {	// If we have any remaining characters in the input (which we will)
-				memcpy(outputBuffer, &inputBuffer[inBufEOL_pos + 1], (nbChar - inBufEOL_pos));	// Copy the remainder of the input into the buffer
+				memcpy(outputBuffer, &inputBuffer[inBufEOL_pos], (nbChar - inBufEOL_pos));	// Copy the remainder of the input into the buffer
 				ParseRead(outputBuffer, (nbChar - inBufEOL_pos));	// Recursively call this function
 			}
 		}
@@ -137,7 +137,7 @@ void Serial::ParseRead(char *inputBuffer, int nbChar)
 			//printf("PRINTED TO EMPTY BUFFER \n");	// DELETE LATER
 			if (nbChar > inBufEOL_pos) {	// If we have any remaining characters in the input (which we will)
 				memset(outputBuffer, 0, strlen(outputBuffer));		// Contents have been printed, clear the buffer 
-				memcpy(outputBuffer, &inputBuffer[inBufEOL_pos + 1], (nbChar - inBufEOL_pos));	// Copy the remainder of the input into the buffer
+				memcpy(outputBuffer, &inputBuffer[inBufEOL_pos], (nbChar - inBufEOL_pos));	// Copy the remainder of the input into the buffer
 				ParseRead(outputBuffer, (nbChar - inBufEOL_pos));	// Recursively call this function
 			}
 		}

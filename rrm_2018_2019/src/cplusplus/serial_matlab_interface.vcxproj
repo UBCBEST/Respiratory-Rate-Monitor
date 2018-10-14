@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{4907B9AD-75B6-48B9-9CEB-9ECA6606935E}</ProjectGuid>
-    <RootNamespace>serialreadtest</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <ProjectGuid>{4D2C033D-DBA6-4B3F-874E-4CB95F628E62}</ProjectGuid>
+    <RootNamespace>serialmatlabinterface</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -115,9 +115,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AccelData.h" />
     <ClInclude Include="SerialPort.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AccelData.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SerialPort.cpp" />
   </ItemGroup>

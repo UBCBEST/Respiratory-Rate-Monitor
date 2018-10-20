@@ -32,14 +32,7 @@ LSM9DS1 sensor_back;
 #define MAG_BACK  0x1C // SDO_M pulled down
 #define ACC_BACK  0x6A // SDO_AG pulled down
 
-////////////////////////////
-// Sketch Output Settings //
-////////////////////////////
-#define PRINT_SPEED 50 // ms between prints
-static unsigned long lastPrint = 0; // Keep track of print time
-static unsigned long milli = 0;
-boolean toggle1 = false;
-boolean printSample = false;
+boolean printSample = true;
 
 //http://www.magnetic-declination.com/
 #define DECLINATION 16.23 // Declination (degrees) in Vancouver, Canada (16 deg, 14')
@@ -85,12 +78,12 @@ void setup()
   
   cli(); // stop interrupts
 
-  //set timer1 interrupt at 100Hz
+  //set timer1 interrupt at 50Hz
   TCCR1A = 0; // set entire TCCR1A register to 0
   TCCR1B = 0; // same for TCCR1B
   TCNT1  = 0; //initialize counter value to 0
   // set compare match register for 1hz increments
-  OCR1A = 2499; // = (16*10^6) / (50*64) - 1 (must be <65536)
+  OCR1A = 1249; // = (16*10^6) / (50*64) - 1 (must be <65536)
   // turn on CTC mode
   TCCR1B |= (1 << WGM12);
   // Set CS12 and CS10 bits for 64 prescaler
@@ -101,18 +94,8 @@ void setup()
   sei(); // allow interrupts
 }
 
-// Timer1 interrupt triggers at 100Hz
+// Timer1 interrupt triggers at 50Hz
 ISR(TIMER1_COMPA_vect){
-  
-  if (toggle1){
-    digitalWrite(LED_BUILTIN,HIGH);
-    toggle1 = false;
-  }
-  else{
-    digitalWrite(LED_BUILTIN,LOW);
-    toggle1 = true;
-  }
-
   printSample = true;
 }
 
@@ -120,6 +103,7 @@ void loop()
 { 
   if(printSample) 
   { 
+    
     if ( sensor_front.gyroAvailable() )   sensor_front.readGyro();
     if ( sensor_back.gyroAvailable() )    sensor_back.readGyro();
     if ( sensor_front.accelAvailable() )  sensor_front.readAccel();
@@ -133,30 +117,8 @@ void loop()
     Serial.print(", ");
     printMag();
     Serial.println();
-
     printSample = false;
   }
-  /*
-  milli = millis();
-  if ((lastPrint + PRINT_SPEED) <= milli)
-  {
-    if ( sensor_front.gyroAvailable() )   sensor_front.readGyro();
-    if ( sensor_back.gyroAvailable() )    sensor_back.readGyro();
-    if ( sensor_front.accelAvailable() )  sensor_front.readAccel();
-    if ( sensor_back.accelAvailable() )   sensor_back.readAccel();
-    if ( sensor_front.magAvailable() )    sensor_front.readMag();
-    if ( sensor_back.magAvailable() )     sensor_back.readMag();
-    
-    printGyro();
-    Serial.print(", ");
-    printAccel();
-    Serial.print(", ");
-    printMag();
-    Serial.println();
-    
-    lastPrint = milli;
-  }
-  */
 }
 
 void printGyro()
@@ -203,40 +165,3 @@ void printMag()
   Serial.print(", ");
   Serial.print(sensor_back.calcMag(sensor_back.mz), 3);
 }
-/*
-void printAttitude(LSM9DS1 sensor)
-{
-  float ax = sensor.ax;
-  float ay = sensor.ay;
-  float az = sensor.az;
-  float mx = sensor.mx;
-  float my = sensor.my;
-  float mz = sensor.mz;
-  
-  float roll = atan2(ay, az);
-  float pitch = atan2(-ax, sqrt(ay * ay + az * az));
-  
-  float heading;
-  if (my == 0)
-    heading = (mx < 0) ? PI : 0;
-  else
-    heading = atan2(mx, my);
-    
-  heading -= DECLINATION * PI / 180;
-  
-  if (heading > PI) heading -= (2 * PI);
-  else if (heading < -PI) heading += (2 * PI);
-  else if (heading < 0) heading += 2 * PI;
-  
-  // Convert everything from radians to degrees:
-  heading *= 180.0 / PI;
-  pitch *= 180.0 / PI;
-  roll  *= 180.0 / PI;
-  
-  Serial.print(pitch, 3);
-  Serial.print(", ");
-  Serial.print(roll, 3);
-  Serial.print(", ");
-  Serial.print(heading, 3);
-}
-*/

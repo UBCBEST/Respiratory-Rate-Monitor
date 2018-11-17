@@ -31,8 +31,13 @@ Beta = 0.1;
 
 %% Declare variables for while/printing loop
 arduino_serial = zeros(1,NumSerialVals);       % Declare arduino serial variable
-quarternion = zeros(1,4);                      % Declare quarternion variable
-euler = 0;
+quarternion_1 = zeros(1,4);                    % Declare quarternion variable(s)
+quarternion_2 = zeros(1,4);
+AHRS_1 = MadgwickAHRS('SamplePeriod', SamplePeriod, 'Beta', Beta);  % Declare MadwickAHRS obj with params sampleperiod and beta
+AHRS_2 = MadgwickAHRS('SamplePeriod', SamplePeriod, 'Beta', Beta);
+
+euler_1 = zeros(1,3);   % Declare euler angle variable
+euler_2 = zeros(1,3);
 
 TempStr = "";      % String var to hold the result of strsplit(fscanf(s))
 i = 0;
@@ -84,11 +89,27 @@ if(plot_mag_en)
     title('Magnetometer');
 end
 
+%% Euler Angles Plot
+figure('Name', 'Euler Angles');
+euler_1_phi     = animatedline('Color','r');
+euler_1_theta   = animatedline('Color','g');
+euler_1_psi     = animatedline('Color','b');
+euler_2_phi     = animatedline('Color','c');
+euler_2_theta   = animatedline('Color','m');
+euler_2_psi     = animatedline('Color','y');
+title('Euler angles');
+xlabel('Time (s)');
+ylabel('Angle (deg)');
+legend('\phi_1', '\theta_1', '\psi_1', '\phi_2', '\theta_2', '\psi_2');
+
 %% Plot serial data in realtime
 startTime = datetime('now');
 
 %% NOTE: Current implementation has considerable lag
 % Todo: Add an easier way to kill this 
+% NOTE: It is quite expensive to keep changing the size of all our data
+% arrays as matlab is forced to allocate new memory and copy the old block
+% over
 while true
     i = i + 1;
     time = datetime('now') - startTime;          %Update time
@@ -139,6 +160,23 @@ while true
         addpoints(magnet_2_y, datenum(time), arduino_serial(i,17));
         addpoints(magnet_2_z, datenum(time), arduino_serial(i,18));
     end
+    
+    % Update AHRS
+    % TODO: Fix this implementation. Live updating Euler angles is broken.
+    % currently just prints one fixed value
+    AHRS_1.Update(arduino_serial(i,1:3) * (pi/180), arduino_serial(i,7:9), arduino_serial(i,13:15));	% gyroscope units must be radians
+    AHRS_2.Update(arduino_serial(i,4:6) * (pi/180), arduino_serial(i,10:12), arduino_serial(i,16:18));	% gyroscope units must be radians
+    quaternion_1(i, :) = AHRS_1.Quaternion;
+    quaternion_2(i, :) = AHRS_2.Quaternion;
+    euler_1 = quatern2euler(quaternConj(quaternion_1)) * (180/pi);	% use conjugate for sensor frame relative to Earth and convert to degrees.
+    euler_2 = quatern2euler(quaternConj(quaternion_2)) * (180/pi);	% use conjugate for sensor frame relative to Earth and convert to degrees.
+    
+    addpoints(euler_1_phi, datenum(time), euler_1(1,1));
+    addpoints(euler_1_theta, datenum(time), euler_1(1,2));
+    addpoints(euler_1_psi, datenum(time), euler_1(1,3));
+    addpoints(euler_2_phi, datenum(time), euler_2(1,1));
+    addpoints(euler_2_theta, datenum(time), euler_2(1,2));
+    addpoints(euler_2_psi, datenum(time), euler_2(1,3));
     
     if(mod(i,100))  %% Plot every 100 datapoints at once (may increase performance)
         drawnow

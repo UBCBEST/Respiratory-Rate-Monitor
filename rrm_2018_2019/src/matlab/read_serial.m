@@ -53,11 +53,16 @@ ax = gca;
 ax.YGrid = 'on';
 
 ArrayPlot = zeros(1,18);
+DataPlot = zeros(1,18);             % Array we use to store our data
+i = 0;                              % Counter to address array indices
 
 startTime = datetime('now');
 while true
+    i = i + 1;
     TempStr = strsplit(fscanf(s),', ');     %split into cells and remove ', ' delimiter
     ArrayPlot = str2double(TempStr);        %convert to double
+    
+    DataPlot(i,:) = ArrayPlot;              % Copy to data array 
     % Get current time
     t =  datetime('now') - startTime;
     % Add points to animation

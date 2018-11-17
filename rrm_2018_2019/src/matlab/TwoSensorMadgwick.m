@@ -1,15 +1,45 @@
-
-
+%% WIP code to plot serial data and calculate Euler angles/quarternions in real time 
+%  Base framework and open source code for the quarternion and euler
+%  lib/func courtesy of http://x-io.co.uk/open-source-imu-and-ahrs-algorithms/?fbclid=IwAR2P0bAUTBM7YWw6JYu3RrQ0-ZCSJ4j-JODJZbVMBfFoYV4wXi0BXSwi1Vs
+%% Import libraries and clear workspace and variables
 addpath('quaternion_library');      % include quaternion library
 close all;                          % close all figures
 clear;                              % clear all variables
 clc;                                % clear the command terminal
 
+NumSerialVals = 18;
+%% Connect to serial device
+fclose(instrfind);                                      % close any existing ports. NOTE: If no ports have been open, you'll need to open an arbitrary port for this to execute
+s = serial('COM5','Baudrate',115200,'Terminator','LF'); % create serial object 
+fopen(s);                                               % open serial port
 % Constants
-SamplePeriod = 1/50;
+SamplePeriod = 1/50;        % Serial reads roughly occur at a freq of 50Hz
 Beta = 0.1;
 
-load("test_data.mat");
+%load("test_data.mat");
+
+%time = 0:SamplePeriod:SamplePeriod*(size(arduino_serial,1)-1);
+
+%% Temp. Capture data for 10 seconds and plot
+arduino_serial = zeros(1,NumSerialVals);       % Declare arduino serial variable
+
+TempStr = "";      % String var to hold the result of strsplit(fscanf(s))
+i = 0;
+tic
+while toc < 10          % Measure for 10 seconds
+    i = i + 1;
+    % Try reading from serial
+    TempStr = strsplit(fscanf(s),', ');          %split into cells and remove ', ' delimiter
+    if(numel(str2double(TempStr)) ~= NumSerialVals)
+        if(i == 1)
+            i = 0;   % In case our first read to serial starts in the middle of a serial stream, toss the data
+        else
+            arduino_serial(i,:) = TempArray(i-1,:);
+        end
+    else 
+        arduino_serial(i,:) = str2double(TempStr);        %convert to double
+    end
+end
 
 time = 0:SamplePeriod:SamplePeriod*(size(arduino_serial,1)-1);
 

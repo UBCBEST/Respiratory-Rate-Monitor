@@ -2,6 +2,9 @@ import processing.serial.*;
 import java.io.*;
 
 Serial myPort;
+BufferedReader reader;
+
+String line;
 
 float yaw = 0.0;
 float pitch = 0.0;
@@ -11,13 +14,7 @@ void setup()
 {
   size(600, 500, P3D);
 
-  // if you have only ONE serial port active
-  myPort = new Serial(this, Serial.list()[0], 9600); // if you have only ONE serial port active
-
-  // if you know the serial port name
-  //myPort = new Serial(this, "COM5:", 9600);                    // Windows
-  //myPort = new Serial(this, "/dev/ttyACM0", 9600);             // Linux
-  //myPort = new Serial(this, "/dev/cu.usbmodem1217321", 9600);  // Mac
+  reader = createReader("testdat.txt");
 
   textSize(16); // set text size
   textMode(SHAPE); // set text mode to shape
@@ -55,59 +52,26 @@ void draw()
   print("\t");
   print(yaw);
   println();
+  delay(20);
 }
 
 void serialEvent()
 {
-  //int newLine = 13; // new line character in ASCII
-  //String message;
-  //do {
-  //  message = myPort.readStringUntil(newLine); // read from port until new line
-  //  if (message != null) {
-  //    String[] list = split(trim(message), " ");
-  //    if (list.length >= 4 && list[0].equals("Orientation:")) {
-  //      yaw = float(list[1]); // convert to float yaw
-  //      pitch = float(list[2]); // convert to float pitch
-  //      roll = float(list[3]); // convert to float roll
-  //    }
-  //  }
-  //} while (message != null);
-  
-  File file = new File("euler.txt");
+  // Modified from BufferedReader documentation
   try {
-    BufferedReader br = new BufferedReader(new java.io.FileReader(file));
-  }
-  catch (Exception e) {
+    line = reader.readLine();
+  } catch (IOException e) {
     e.printStackTrace();
+    line = null;
   }
-  
-  String st;
-  ArrayList<Float[]>  allDOF = new ArrayList<Float[]>();
-  Float[] singleDOF = new Float[3];
-  try {
-    while ((st = br.readLine()) != null) {
-        String currDOF[] = st.split(",");
-        singleDOF[0] = Float.valueOf(currDOF[0]);
-        singleDOF[1] = Float.valueOf(currDOF[1]);
-        singleDOF[2] = Float.valueOf(currDOF[2]);
-        allDOF.add(singleDOF);
-    }
-  }
-  catch (Exception e) {
-    e.printStackTrace();
-  }
-
-  for (int i = 0; i < allDOF.size(); i++) {
-      roll = allDOF.get(i)[0];
-      pitch = allDOF.get(i)[1];
-      yaw = allDOF.get(i)[2];
-      try {
-        Thread.sleep(20);
-      }
-      catch (Exception e)
-      {
-        e.printStackTrace();
-      }
+  if (line == null) {
+    // Stop reading because of an error or file is empty
+    noLoop();  
+  } else {
+    String[] pieces = line.split(",");
+    roll = float(pieces[0]);
+    pitch = float(pieces[1]);
+    yaw = float(pieces[2]);
   }
 }
 

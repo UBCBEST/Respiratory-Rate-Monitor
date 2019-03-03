@@ -4,7 +4,7 @@
 #define SERIALPORT_H_INCLUDED
 
 #define ARDUINO_WAIT_TIME 2000
-#define TIME_BETWEEN_SERIAL_WRITES 50	// in ms
+#define TIME_BETWEEN_SERIAL_WRITES 50	// in ms, need to sync with transmission time from connected serial device
 
 #include <windows.h>
 #include <stdio.h>

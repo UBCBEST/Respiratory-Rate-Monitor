@@ -9,7 +9,6 @@ void Accel_Data::set_print_val_flag(bool flag_val) {
 	this->print_val_flag = flag_val;
 }
 
-// Debugging in progress. Stack corruption + some other fun stuff happening 
 // Takes the parsed string from the Serial read and tries to store and cast it into
 // the member variables of the class container. 
 // Returns true if successful

@@ -66,7 +66,7 @@ while true
     % Get current time
     t =  datetime('now') - startTime;
     % Add points to animation
-    addpoints(plot_realtime,repmat(datenum(t),1,1),ArrayPlot(1,1))  % TODO: This plot looks pretty garbo....
+    addpoints(plot_realtime,repmat(datenum(t),1,1),ArrayPlot(1,1))  
     % Update axes
     ax.XLim = datenum([t-seconds(15) t]);   % Capture about a 10 second window
     datetick('x','keeplimits')

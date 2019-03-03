@@ -96,7 +96,7 @@ void setup()
 
 // Timer1 interrupt triggers at 50Hz
 ISR(TIMER1_COMPA_vect){
-  printSample = true;
+  printSample = true; // Timer ISR trigger data transmission
 }
 
 void loop()
@@ -116,11 +116,13 @@ void loop()
     printAccel();
     Serial.print(", ");
     printMag();
-    Serial.println();
+    Serial.println();     // Separates sets of readings with a new line and carriage character
     printSample = false;
   }
 }
 
+// The following three functions format the data into human readable strings to send over serial communications
+// Here new values are separated by a comma and space
 void printGyro()
 {
   Serial.print(sensor_front.calcGyro(sensor_front.gx), 3);

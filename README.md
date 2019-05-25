@@ -46,4 +46,4 @@ Note: Euler angle data requires some 'ramp-up' time before accurately displaying
 All source code more or less can be deployed immediately after cloning the repository provided the Arduino file and hardware is configured accordingly.
 
 ## Contact
-Any questions and inquiries (i.e additional research materials, datasheets) can be directed to : 
+Any questions and inquiries (i.e additional research materials, datasheets) can be directed to : best.ubc@gmail.com 
